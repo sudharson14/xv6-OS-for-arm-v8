@@ -1,0 +1,46 @@
+                                         History and Timeline
+             "...the number of UNIX installations has grown to 10, with more expected..."
+                              - Dennis Ritchie and Ken Thompson, June 1972
+
+             "... When BTL withdrew from the project, they needed to rewrite an operating
+               system (OS) in order to play space war on another smaller machine (a DEC
+                        PDP-7 [Programmed Data Processor] with 4K memory for user
+                    programs). The result was a system which a punning colleague called
+                           UNICS (UNiplexed Information and Computing Service)--an
+                  'emasculated Multics'; no one recalls whose idea the change to UNIX was"
+                                    Source: A brief look at the early history
+
+
+Since it began to escape from AT&T's Bell Laboratories in the early 1970's, the success of the UNIX operating system has led to many different versions: recipients of the (at that time free) UNIX system code all began developing their own different versions in their own, different, ways for use and sale. Universities, research institutes, government bodies and computer companies all began using the powerful UNIX system to develop many of the technologies which today are part of a UNIX system.
+
+Computer aided design, manufacturing control  systems, laboratory simulations, even the Internet itself, all began life with and because of UNIX systems. Today, without UNIX systems, the Internet would come to a screeching halt. Most telephone calls could not be made, electronic commerce would grind to a halt and there would have never been "Jurassic Park"!
+
+By the late 1970's, a ripple effect had come into play. By now the under- and post-graduate students whose lab work had pioneered these new applications of technology were attaining management and decision-making positions inside the computer system suppliers and among its customers. And they wanted to continue using UNIX systems.
+
+Soon all the large vendors, and many smaller ones, were marketing their own, diverging, versions of the UNIX system optimized for their own computer architectures and boasting many different strengths and features. Customers found that, although UNIX systems were available everywhere, they seldom were able to interwork or co-exist without significant investment of time and effort to make them work effectively. The trade mark UNIX was ubiquitous, but it was applied to a multitude of different, incompatible products.
+
+In the early 1980's, the market for UNIX systems had grown enough to be noticed  by industry analysts and researchers. Now the question was no longer "What is a UNIX system?" but "Is a UNIX system suitable for business and commerce?"
+
+Throughout the early and mid-1980's, the debate about the strengths and weaknesses of UNIX systems raged, often fuelled by the utterances of the vendors themselves who sought to protect their profitable proprietary system sales by talking UNIX systems down. And, in an effort to further differentiate their competing UNIX system products, they kept developing and adding features of their own.
+
+In 1984, another factor brought added attention to UNIX systems. A group of vendors concerned about the continuing encroachment into their markets and control of system interfaces by the larger companies, developed the concept of "open systems."
+
+Open systems were those that would meet agreed specifications or standards. This resulted in the formation of X/Open Company Ltd whose remit was, and today in the guise of The Open Group remains, to define a comprehensive open systems environment. Open systems, they declared, would save on costs, attract a wider portfolio of applications and competition on equal terms. X/Open chose the UNIX system as the platform for the basis of open systems.
+
+Although UNIX was still owned by AT&T, the company did little commercially with it until the mid-1980's. Then the spotlight of X/Open showed clearly that a single, standard version of the UNIX system would be in the wider interests of  the industry and its customers. The question now was, "which version?".
+
+In a move intended to unify the market in 1987, AT&T announced a pact with Sun Microsystems, the leading proponent of the Berkeley derived strain of UNIX. However, the rest of the industry viewed the development with considerable concern. Believing that their own markets were under threat they clubbed together to develop their own "new" open systems operating system. Their new organization was called the Open Software Foundation (OSF). In response to this, the AT&T/Sun faction formed UNIX International.
+
+The ensuing "UNIX wars" divided the system vendors between these two camps clustered around the two dominant UNIX system technologies: AT&T's System V and the OSF system called OSF/1. In the meantime, X/Open Company held the center ground. It continued the process of standardizing the APIs necessary for an open operating system specification.
+
+In addition, it looked at areas of the system beyond the operating system level where a standard approach would add value for supplier and customer alike, developing or adopting specifications for languages, database connectivity, networking and mainframe interworking. The results of this work were published in successive X/Open Portability Guides.
+
+XPG 4 was released in October 1992. During this time, X/Open had put in place a brand program based on vendor guarantees and supported by testing. Since the publication of XPG4, X/Open has continued to broaden the scope of open systems specifications in line with market requirements. As the benefits of the X/Open brand became known and understood, many large organizations began using X/Open as the basis for system design and procurement. By 1993, over $7 billion had been spent on X/Open branded systems. By the start of 1997 that figure has risen to over $23 billion. To date, procurements referencing the Single UNIX Specification amount to over $5.2 billion.
+
+In early 1993, AT&T sold it UNIX System Laboratories to Novell which was looking for a heavyweight operating system to link to its NetWare product range. At the same time, the company recognized that vesting control of the definition (specification) and trademark with a vendor-neutral organization would further facilitate the value of UNIX as a foundation of open systems. So the constituent parts of the UNIX System (source code/technology and specification/trademark), previously owned by a single entity are now quite separate
+
+In 1995 X/Open introduced the UNIX 95 brand for computer systems guaranteed to meet the Single UNIX Specification. The Single UNIX Specification brand program has now achieved critical mass: vendors whose products have met the demanding criteria now account for the majority of UNIX systems by value.
+
+For over twenty years, since the inception of X/Open, UNIX had been closely linked with open systems. X/Open, now The Open Group, continues to develop and evolve the Single UNIX Specification and associated brand program on behalf of the IT community. The freeing of the specification of the interfaces from the technology is allowing many systems to support the UNIX philosophy of small, often simple tools , that can be combined in many ways to perform often complex tasks. The stability of the core interfaces preserves existing investment, and is allowing development of a rich set of software tools. The Open Source movement is building on this stable foundation and is creating a resurgence of enthusiasm for the UNIX philosophy. In many ways Open Source can be seen as the true delivery of Open Systems that will ensure it continues to go from strength to strength.
+
+Source: http://www.unix.org/what_is_unix/history_timeline.html

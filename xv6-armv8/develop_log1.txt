@@ -1,0 +1,64 @@
+
+Current two issues found. The first is that cprint does not show any on console 
+but the _puts during start can print. The second is that kernel crash when kernel
+try to start usr32 mode by trapret. 
+
+The first is important to help debugging. However, as we already can print by _puts
+and the qemu.log records every single step exec result. The first issue won't block
+our debugging and seems not hard to resolve. I choose to debug the first issue later. 
+
+
+The second issue, is caused during first time switch to user process usr32 mode. See
+the log below. The usr program 0x0/0x4 and 0x8 setup parameters on R0/R1/R2 and then
+send a svc request for system call. The corresponding usr code is setup in usrinit()
+"initcode" from initcode.S:
+start:
+    LDR     r1, =init
+    LDR     r2, =argv
+    MOV     r0, #SYS_exec
+    SWI     0x00
+
+However, we can see from the log below. The content at intvect is 0x0 and cause kernel 
+crash!
+
+----------------
+0xc0027520:  e16ff002      msr  SPSR_fsxc, r2
+PSR=20000053 --C- A svc32
+----------------
+0xc0027524:  e8fd9fff      ldm  sp!, {r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, pc}^
+Trace 0x7fe5e2dfb360 [c0027524] 
+R00=00000000 R01=00000002 R02=60000050 R03=20000053
+R04=00000000 R05=00000000 R06=00000000 R07=00000000
+R08=00000000 R09=00000000 R10=00000000 R11=c7fdf000
+R12=00000000 R13=c7fdefc8 R14=c00250f8 R15=c0027524
+PSR=20000053 --C- A svc32
+----------------
+0x00000000:  e59f1024      ldr  r1, [pc, #36]   ; 0x2c
+R00=00000000 R01=00000000 R02=00000000 R03=00000000
+R04=00000000 R05=00000000 R06=00000000 R07=00000000
+R08=00000000 R09=00000000 R10=00000000 R11=00000000
+R12=00000000 R13=00001000 R14=00000000 R15=00000000
+PSR=60000050 -ZC- A usr32
+----------------
+0x00000004:  e59f2024      ldr  r2, [pc, #36]   ; 0x30
+----------------
+0x00000008:  e3a00007      mov  r0, #7  ; 0x7
+----------------
+0x0000000c:  ef000000      svc  0x00000000
+R00=00000007 R01=0000001c R02=00000024 R03=00000000
+R04=00000000 R05=00000000 R06=00000000 R07=00000000
+R08=00000000 R09=00000000 R10=00000000 R11=00000000
+R12=00000000 R13=00001000 R14=00000000 R15=0000000c
+PSR=60000050 -ZC- A usr32
+----------------
+0xffff0008:  00000000      andeq        r0, r0, r0
+Trace 0x7fe5e2dfb980 [ffff0008] 
+R00=00000007 R01=0000001c R02=00000024 R03=00000000
+R04=00000000 R05=00000000 R06=00000000 R07=00000000
+R08=00000000 R09=00000000 R10=00000000 R11=00000000
+R12=00000000 R13=c7fdf000 R14=00000010 R15=ffff0008
+PSR=600000d3 -ZC- A svc32
+----------------
+----------------
+----------------
+

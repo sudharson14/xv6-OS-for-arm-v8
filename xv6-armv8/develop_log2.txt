@@ -1,0 +1,21 @@
+
+Current issue is usr program can not key-in character from console. 
+Same as guess, the console input wait on a queue that hangs on a lock.
+This lock is waked from UART interrupt. Interrupt handle also send char
+into the input queue.
+
+
+Trace code of interrupt emulate on qemu
+---------------------------------------
+vexpress.c initilize a GIC 
+    /* 0x2c000000 A15MPCore private memory region (GIC) */
+    init_cpus(cpu_model, "a15mpcore_priv", 0x2c000000, pic);
+then found the TYPE_A15MPCORE_PRIV in a15mpcore.c:
+
+
+    /* The Cortex-A15MP may have anything from 0 to 224 external interrupt
+     * IRQ lines (with another 32 internal). We default to 128+32, which
+     * is the number provided by the Cortex-A15MP test chip in the
+     * Versatile Express A15 development board.
+     * Other boards may differ and should set this property appropriately.
+     */
