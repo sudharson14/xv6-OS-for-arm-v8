@@ -74,7 +74,7 @@ void set_bootpgtbl (uint64 virt, uint64 phy, uint len, int dev_mem )
 
         if (!dev_mem) {
             // normal memory
-            pde |= ACCESS_FLAG | SH_IN_SH | AP_RW_1_0 | NON_SECURE_PA | MEM_ATTR_IDX_4 | ENTRY_BLOCK | ENTRY_VALID;
+            pde |= ACCESS_FLAG | SH_IN_SH | AP_RW_1 | NON_SECURE_PA | MEM_ATTR_IDX_4 | ENTRY_BLOCK | ENTRY_VALID | UXN;
         } else {
             // device memory
             pde |= ACCESS_FLAG | AP_RW_1 | MEM_ATTR_IDX_0 | ENTRY_BLOCK | ENTRY_VALID;
