@@ -21,9 +21,6 @@
 // and switches to a new process (including user-space banked registers)
 #ifndef __ASSEMBLER__
 struct trapframe {
-    uint64    sp;     // user mode sp
-    uint64    pc;     // user mode pc (elr)
-    uint64    spsr;
     uint64    r0;
     uint64    r1;
     uint64    r2;
@@ -55,6 +52,9 @@ struct trapframe {
     uint64    r28;
     uint64    r29;
     uint64    r30;	// user mode lr
+    uint64    sp;     // user mode sp
+    uint64    pc;     // user mode pc (elr)
+    uint64    spsr;
 };
 #endif
 

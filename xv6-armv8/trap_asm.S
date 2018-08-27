@@ -20,8 +20,8 @@
 	stp	x0, x1, [sp, #-16]!
 	add x21, sp, #0x110
 
-	mrs	x22, elr_el3             /* ELR */
-	mrs	x23, spsr_el3            /* SPSR */
+	mrs	x22, elr_el1             /* ELR */
+	mrs	x23, spsr_el1            /* SPSR */
 
 	stp	x30, x21, [sp, #0xf0]    /* LR, SP */
 	stp	x22, x23, [sp, #0x100]   /* ELR, SPSR */
@@ -31,8 +31,8 @@
 	ldp	x22, x23, [sp, #0x100]   /* ELR, SPSR */
 	ldp	x30, x28, [sp, #0xf0]    /* LR, SP */
 
-	msr	elr_el3, x22             /* ELR */
-	msr	spsr_el3, x23
+	msr	elr_el1, x22             /* ELR */
+	msr	spsr_el1, x23
 	
 	mov x29, sp
 	mov sp, x28
@@ -75,8 +75,8 @@
 	stp	x0, x1, [sp, #-16]!
 
 	mrs x21, sp_el0
-	mrs	x22, elr_el3             /* ELR */
-	mrs	x23, spsr_el3            /* SPSR */
+	mrs	x22, elr_el1             /* ELR */
+	mrs	x23, spsr_el1            /* SPSR */
 
 	stp	x30, x21, [sp, #0xf0]    /* LR, SP */
 	stp	x22, x23, [sp, #0x100]   /* ELR, SPSR */
@@ -86,11 +86,12 @@
 	ldp	x22, x23, [sp, #0x100]   /* ELR, SPSR */
 	ldp	x30, x28, [sp, #0xf0]    /* LR, SP */
 
-	msr	elr_el3, x22             /* ELR */
-	msr	spsr_el3, x23
+	msr	elr_el1, x22             /* ELR */
+	msr	spsr_el1, x23
 	msr sp_el0, x28
 
 	mov x29, sp
+	add sp, sp, #0x110
 
 	ldp	x0, x1, [x29], #16
 	ldp	x2, x3, [x29], #16
