@@ -263,30 +263,50 @@ el0_svc:
 	mov	x0, sp
 	mov	x1, #0
 	bl	swi_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	bl	handle_user_events
 	exception_0_exit
 
 el0_da:
 	mov	x0, sp
 	mov	x1, #0
 	bl	dabort_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	bl	handle_user_events
 	b	.
 
 el0_ia:
 	mov	x0, sp
 	mov	x1, #0
 	bl	iabort_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	bl	handle_user_events
 	b	.
 
 el0_undef:
 	mov	x0, sp
 	mov	x1, #0
 	bl	und_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	bl	handle_user_events
 	b	.
 
 el0_default:
 	mov	x0, sp
 	mov	x1, #0
 	bl	default_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	bl	handle_user_events
 	b	.
 
 	.align	6
@@ -296,6 +316,10 @@ _el_lower_irq:
 	mov	x1, #0
 	mrs	x2, esr_el1
 	bl	irq_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	bl	handle_user_events
 	exception_0_exit
 
 	.align	6
@@ -305,6 +329,10 @@ _el_lower_fiq:
 	mov	x1, #0
 	mrs	x2, esr_el1
 	bl	fiq_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	bl	handle_user_events
 	b	.
 
 	.align	6
@@ -314,5 +342,9 @@ _el_lower_error:
 	mov	x1, #0
 	mrs	x2, esr_el1
 	bl	error_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	bl	handle_user_events
 	b	.
 

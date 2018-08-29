@@ -6,6 +6,20 @@
 #include "proc.h"
 
 // trap routine
+void handle_user_events(struct trapframe *r, uint32 el, uint32 esr) {
+    
+    if ( ( r->spsr & 0xf ) != 0 )
+	    panic("Invalid Saved Processor State.");
+
+    if ( proc->killed != 0 ) {
+	    
+	cprintf("proc killed: pid: %d name: %s EL:%d ESR:0x%x\n",
+	    proc->pid, proc->name, el, esr);
+	exit();
+    }
+}
+
+// trap routine
 void swi_handler (struct trapframe *r, uint32 el, uint32 esr)
 {
     //cprintf("\tswi_handler: %d\n", r->r0);
@@ -34,21 +48,38 @@ void dabort_handler (struct trapframe *r, uint32 el, uint32 esr)
 
     // read the fault address register
     asm("MRS %[r], FAR_EL1": [r]"=r" (fa)::);
-    
-    cprintf ("data abort: instruction 0x%x, fault addr 0x%x\n",
-             r->pc, fa);
-  
-    dump_trapframe (r);
-    //show_callstk("Stack dump for data exception.");
+    if ( ( r->spsr & 0xf ) == 0 ) {
+
+	cprintf("Data abort  esr %x on cpu %d pc 0x%x addr 0x%x -- kill proc\n",
+	    esr, cpu->id, r->pc, fa);
+	kill(proc->pid);
+    } else {
+
+	cprintf ("data abort: instruction 0x%x, fault addr 0x%x\n",
+	    r->pc, fa);
+	//show_callstk("Stack dump for data exception.");
+    }
 }
 
 // trap routine
 void iabort_handler (struct trapframe *r, uint32 el, uint32 esr)
 {
-    cli();
-    cprintf ("prefetch abort at: 0x%x\n", r->pc);
+    uint64 fa;
 
-    dump_trapframe (r);
+    cli();
+
+    // read the fault address register
+    asm("MRS %[r], FAR_EL1": [r]"=r" (fa)::);
+    if ( ( r->spsr & 0xf ) == 0 ) {
+
+	cprintf("Instruction abort esr %x on cpu %d pc 0x%x addr 0x%x -- kill proc\n",
+	    esr, cpu->id, r->pc, fa);
+	kill(proc->pid);
+    } else {
+
+	cprintf ("prefetch abort at: 0x%x\n", r->pc);
+	dump_trapframe (r);
+    }
 }
 
 // trap routine
@@ -62,8 +93,16 @@ void reset_handler (struct trapframe *r, uint32 el, uint32 esr)
 void und_handler (struct trapframe *r, uint32 el, uint32 esr)
 {
     cli();
-    cprintf ("und at: 0x%x \n", r->pc);
-    dump_trapframe (r);
+    if ( ( r->spsr & 0xf ) == 0 ) {
+	
+	cprintf("Undefined trap  esr %x on cpu %d pc 0x%x -- kill proc\n", 
+	    esr, cpu->id, r->pc);
+	kill(proc->pid);
+    } else {
+
+	cprintf ("und at: 0x%x \n", r->pc);
+	dump_trapframe (r);
+    }
 }
 
 // trap routine
