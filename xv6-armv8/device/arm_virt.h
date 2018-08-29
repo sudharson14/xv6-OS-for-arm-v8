@@ -26,9 +26,13 @@
 #define CLK_HZ          1000000     // the clock is 1MHZ
 
 #define VIC_BASE        0x08000000
-#define PIC_TIMER01     13
-#define PIC_TIMER23     11
-#define PIC_UART0       1
-#define PIC_GRAPHIC     19
 
+#define GICD_INTNO_SGIO         (0)
+#define GICD_INTNO_PPIO         (16)
+#define GICD_INTNO_SPIO         (32)
+
+#define PIC_TIMER01     ( GICD_INTNO_SPIO + 13 )
+#define PIC_TIMER23     ( GICD_INTNO_SPIO + 11 )
+#define PIC_UART0       ( GICD_INTNO_SPIO + 1  )
+#define PIC_GRAPHIC     ( GICD_INTNO_SPIO + 19 )
 #endif /* __ARM_VIRT__ */
