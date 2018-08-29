@@ -35,4 +35,5 @@
 #define PIC_TIMER23     ( GICD_INTNO_SPIO + 11 )
 #define PIC_UART0       ( GICD_INTNO_SPIO + 1  )
 #define PIC_GRAPHIC     ( GICD_INTNO_SPIO + 19 )
+#define PIC_VTIMER      ( GICD_INTNO_PPIO + 11 )
 #endif /* __ARM_VIRT__ */

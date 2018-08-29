@@ -31,7 +31,7 @@ OBJS = \
 	trap_asm.o\
 	vm.o \
 	\
-	device/timer.o \
+	device/vtimer.o \
 	device/uart.o \
 	device/gic.o
 

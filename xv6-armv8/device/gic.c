@@ -225,9 +225,8 @@ void gic_init(void * base)
 	gic_cpu_init();
 	isr_init();
 
-	gic_configure(SPI_TYPE, PIC_TIMER01);
-	gic_configure(SPI_TYPE, PIC_TIMER23);
 	gic_configure(SPI_TYPE, PIC_UART0);
+	gic_configure(PPI_TYPE, PIC_VTIMER);
 
 	gic_enable();
 
@@ -236,7 +235,7 @@ void gic_init(void * base)
 /*
  * dispatch the interrupt
  */
-void pic_dispatch (struct trapframe *tp)
+int pic_dispatch (struct trapframe *tp)
 {
 	int intid;
 
@@ -250,6 +249,6 @@ void pic_dispatch (struct trapframe *tp)
 	gd_enable(intid);
 
 out:
-	return;
+	return intid;
 }
 

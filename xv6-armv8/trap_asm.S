@@ -266,6 +266,8 @@ el0_svc:
 	mov	x0, sp
 	mov	x1, #0
 	mrs	x2, esr_el1
+	mov	x3, #(0x3ff)  // 0x3ff means spurious interrupt,
+			      // it is used for the exception is not an interrupt
 	bl	handle_user_events
 	exception_0_exit
 
@@ -276,6 +278,8 @@ el0_da:
 	mov	x0, sp
 	mov	x1, #0
 	mrs	x2, esr_el1
+	mov	x3, #(0x3ff)  // 0x3ff means spurious interrupt,
+			      // it is used for the exception is not an interrupt
 	bl	handle_user_events
 	b	.
 
@@ -286,6 +290,8 @@ el0_ia:
 	mov	x0, sp
 	mov	x1, #0
 	mrs	x2, esr_el1
+	mov	x3, #(0x3ff)  // 0x3ff means spurious interrupt,
+			      // it is used for the exception is not an interrupt
 	bl	handle_user_events
 	b	.
 
@@ -296,6 +302,8 @@ el0_undef:
 	mov	x0, sp
 	mov	x1, #0
 	mrs	x2, esr_el1
+	mov	x3, #(0x3ff)  // 0x3ff means spurious interrupt,
+			      // it is used for the exception is not an interrupt
 	bl	handle_user_events
 	b	.
 
@@ -306,6 +314,8 @@ el0_default:
 	mov	x0, sp
 	mov	x1, #0
 	mrs	x2, esr_el1
+	mov	x3, #(0x3ff)  // 0x3ff means spurious interrupt,
+			      // it is used for the exception is not an interrupt
 	bl	handle_user_events
 	b	.
 
@@ -316,6 +326,7 @@ _el_lower_irq:
 	mov	x1, #0
 	mrs	x2, esr_el1
 	bl	irq_handler
+	mov	x3, x0  // irq_handler returns IRQ no which we processed.
 	mov	x0, sp
 	mov	x1, #0
 	mrs	x2, esr_el1
@@ -332,6 +343,8 @@ _el_lower_fiq:
 	mov	x0, sp
 	mov	x1, #0
 	mrs	x2, esr_el1
+	mov	x3, #(0x3ff)  // 0x3ff means spurious interrupt,
+			      // it is used for the exception is not an interrupt
 	bl	handle_user_events
 	b	.
 
@@ -345,6 +358,8 @@ _el_lower_error:
 	mov	x0, sp
 	mov	x1, #0
 	mrs	x2, esr_el1
+	mov	x3, #(0x3ff)  // 0x3ff means spurious interrupt,
+			      // it is used for the exception is not an interrupt
 	bl	handle_user_events
 	b	.
 

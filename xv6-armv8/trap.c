@@ -4,18 +4,28 @@
 #include "param.h"
 #include "arm.h"
 #include "proc.h"
+#include "device/arm_virt.h"
 
 // trap routine
-void handle_user_events(struct trapframe *r, uint32 el, uint32 esr) {
+void handle_user_events(struct trapframe *r, uint32 el, uint32 esr, int intid) {
     
     if ( ( r->spsr & 0xf ) != 0 )
 	    panic("Invalid Saved Processor State.");
 
-    if ( proc->killed != 0 ) {
-	    
-	cprintf("proc killed: pid: %d name: %s EL:%d ESR:0x%x\n",
-	    proc->pid, proc->name, el, esr);
-	exit();
+    if ( proc != NULL ) {
+
+	if ( proc->killed != 0 )
+	    exit();
+
+	/* Strictly speaking, this should have marked a bit which indicates
+	   a preemption request is pending in a cpu struct when a timer interrupt occurs.
+	   Otherwise, the preemption will be performed only if a timer interrupt occurs in 
+	   userland. 
+	   This behavior might be a bug in xv6 for IA32. I leave this on purpose to keep the
+	   compatibility with IA32 version.
+	 */
+	if ( intid == PIC_VTIMER && proc->state == RUNNING )
+	    yield();
     }
 }
 
@@ -28,7 +38,7 @@ void swi_handler (struct trapframe *r, uint32 el, uint32 esr)
 }
 
 // trap routine
-void irq_handler (struct trapframe *r, uint32 el, uint32 esr)
+int irq_handler (struct trapframe *r, uint32 el, uint32 esr)
 {
     // proc points to the current process. If the kernel is
     // running scheduler, proc is NULL.
@@ -36,7 +46,7 @@ void irq_handler (struct trapframe *r, uint32 el, uint32 esr)
         proc->tf = r;
     }
 
-    pic_dispatch (r);
+    return pic_dispatch (r);
 }
 
 // trap routine
