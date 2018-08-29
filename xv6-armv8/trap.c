@@ -4,6 +4,30 @@
 #include "param.h"
 #include "arm.h"
 #include "proc.h"
+#include "device/arm_virt.h"
+
+// trap routine
+void handle_user_events(struct trapframe *r, uint32 el, uint32 esr, int intid) {
+    
+    if ( ( r->spsr & 0xf ) != 0 )
+	    panic("Invalid Saved Processor State.");
+
+    if ( proc != NULL ) {
+
+	if ( proc->killed != 0 )
+	    exit();
+
+	/* Strictly speaking, this should have marked a bit which indicates
+	   a preemption request is pending in a cpu struct when a timer interrupt occurs.
+	   Otherwise, the preemption will be performed only if a timer interrupt occurs in 
+	   userland. 
+	   This behavior might be a bug in xv6 for IA32. I leave this on purpose to keep the
+	   compatibility with IA32 version.
+	 */
+	if ( intid == PIC_VTIMER && proc->state == RUNNING )
+	    yield();
+    }
+}
 
 // trap routine
 void swi_handler (struct trapframe *r, uint32 el, uint32 esr)
@@ -14,7 +38,7 @@ void swi_handler (struct trapframe *r, uint32 el, uint32 esr)
 }
 
 // trap routine
-void irq_handler (struct trapframe *r, uint32 el, uint32 esr)
+int irq_handler (struct trapframe *r, uint32 el, uint32 esr)
 {
     // proc points to the current process. If the kernel is
     // running scheduler, proc is NULL.
@@ -22,7 +46,7 @@ void irq_handler (struct trapframe *r, uint32 el, uint32 esr)
         proc->tf = r;
     }
 
-    pic_dispatch (r);
+    return pic_dispatch (r);
 }
 
 // trap routine
@@ -34,21 +58,38 @@ void dabort_handler (struct trapframe *r, uint32 el, uint32 esr)
 
     // read the fault address register
     asm("MRS %[r], FAR_EL1": [r]"=r" (fa)::);
-    
-    cprintf ("data abort: instruction 0x%x, fault addr 0x%x\n",
-             r->pc, fa);
-  
-    dump_trapframe (r);
-    //show_callstk("Stack dump for data exception.");
+    if ( ( r->spsr & 0xf ) == 0 ) {
+
+	cprintf("Data abort  esr %x on cpu %d pc 0x%x addr 0x%x -- kill proc\n",
+	    esr, cpu->id, r->pc, fa);
+	kill(proc->pid);
+    } else {
+
+	cprintf ("data abort: instruction 0x%x, fault addr 0x%x\n",
+	    r->pc, fa);
+	//show_callstk("Stack dump for data exception.");
+    }
 }
 
 // trap routine
 void iabort_handler (struct trapframe *r, uint32 el, uint32 esr)
 {
-    cli();
-    cprintf ("prefetch abort at: 0x%x\n", r->pc);
+    uint64 fa;
 
-    dump_trapframe (r);
+    cli();
+
+    // read the fault address register
+    asm("MRS %[r], FAR_EL1": [r]"=r" (fa)::);
+    if ( ( r->spsr & 0xf ) == 0 ) {
+
+	cprintf("Instruction abort esr %x on cpu %d pc 0x%x addr 0x%x -- kill proc\n",
+	    esr, cpu->id, r->pc, fa);
+	kill(proc->pid);
+    } else {
+
+	cprintf ("prefetch abort at: 0x%x\n", r->pc);
+	dump_trapframe (r);
+    }
 }
 
 // trap routine
@@ -62,8 +103,16 @@ void reset_handler (struct trapframe *r, uint32 el, uint32 esr)
 void und_handler (struct trapframe *r, uint32 el, uint32 esr)
 {
     cli();
-    cprintf ("und at: 0x%x \n", r->pc);
-    dump_trapframe (r);
+    if ( ( r->spsr & 0xf ) == 0 ) {
+	
+	cprintf("Undefined trap  esr %x on cpu %d pc 0x%x -- kill proc\n", 
+	    esr, cpu->id, r->pc);
+	kill(proc->pid);
+    } else {
+
+	cprintf ("und at: 0x%x \n", r->pc);
+	dump_trapframe (r);
+    }
 }
 
 // trap routine

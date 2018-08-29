@@ -113,7 +113,7 @@ void            commit_trans();
 // picirq.c
 void            pic_enable(int, ISR);
 void            pic_init(void*);
-void            pic_dispatch (struct trapframe *tp);
+int             pic_dispatch (struct trapframe *tp);
 
 // pipe.c
 int             pipealloc(struct file**, struct file**);

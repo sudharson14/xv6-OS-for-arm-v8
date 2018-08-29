@@ -20,8 +20,8 @@
 	stp	x0, x1, [sp, #-16]!
 	add x21, sp, #0x110
 
-	mrs	x22, elr_el3             /* ELR */
-	mrs	x23, spsr_el3            /* SPSR */
+	mrs	x22, elr_el1             /* ELR */
+	mrs	x23, spsr_el1            /* SPSR */
 
 	stp	x30, x21, [sp, #0xf0]    /* LR, SP */
 	stp	x22, x23, [sp, #0x100]   /* ELR, SPSR */
@@ -31,8 +31,8 @@
 	ldp	x22, x23, [sp, #0x100]   /* ELR, SPSR */
 	ldp	x30, x28, [sp, #0xf0]    /* LR, SP */
 
-	msr	elr_el3, x22             /* ELR */
-	msr	spsr_el3, x23
+	msr	elr_el1, x22             /* ELR */
+	msr	spsr_el1, x23
 	
 	mov x29, sp
 	mov sp, x28
@@ -75,8 +75,8 @@
 	stp	x0, x1, [sp, #-16]!
 
 	mrs x21, sp_el0
-	mrs	x22, elr_el3             /* ELR */
-	mrs	x23, spsr_el3            /* SPSR */
+	mrs	x22, elr_el1             /* ELR */
+	mrs	x23, spsr_el1            /* SPSR */
 
 	stp	x30, x21, [sp, #0xf0]    /* LR, SP */
 	stp	x22, x23, [sp, #0x100]   /* ELR, SPSR */
@@ -86,11 +86,12 @@
 	ldp	x22, x23, [sp, #0x100]   /* ELR, SPSR */
 	ldp	x30, x28, [sp, #0xf0]    /* LR, SP */
 
-	msr	elr_el3, x22             /* ELR */
-	msr	spsr_el3, x23
+	msr	elr_el1, x22             /* ELR */
+	msr	spsr_el1, x23
 	msr sp_el0, x28
 
 	mov x29, sp
+	add sp, sp, #0x110
 
 	ldp	x0, x1, [x29], #16
 	ldp	x2, x3, [x29], #16
@@ -262,30 +263,60 @@ el0_svc:
 	mov	x0, sp
 	mov	x1, #0
 	bl	swi_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	mov	x3, #(0x3ff)  // 0x3ff means spurious interrupt,
+			      // it is used for the exception is not an interrupt
+	bl	handle_user_events
 	exception_0_exit
 
 el0_da:
 	mov	x0, sp
 	mov	x1, #0
 	bl	dabort_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	mov	x3, #(0x3ff)  // 0x3ff means spurious interrupt,
+			      // it is used for the exception is not an interrupt
+	bl	handle_user_events
 	b	.
 
 el0_ia:
 	mov	x0, sp
 	mov	x1, #0
 	bl	iabort_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	mov	x3, #(0x3ff)  // 0x3ff means spurious interrupt,
+			      // it is used for the exception is not an interrupt
+	bl	handle_user_events
 	b	.
 
 el0_undef:
 	mov	x0, sp
 	mov	x1, #0
 	bl	und_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	mov	x3, #(0x3ff)  // 0x3ff means spurious interrupt,
+			      // it is used for the exception is not an interrupt
+	bl	handle_user_events
 	b	.
 
 el0_default:
 	mov	x0, sp
 	mov	x1, #0
 	bl	default_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	mov	x3, #(0x3ff)  // 0x3ff means spurious interrupt,
+			      // it is used for the exception is not an interrupt
+	bl	handle_user_events
 	b	.
 
 	.align	6
@@ -295,6 +326,11 @@ _el_lower_irq:
 	mov	x1, #0
 	mrs	x2, esr_el1
 	bl	irq_handler
+	mov	x3, x0  // irq_handler returns IRQ no which we processed.
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	bl	handle_user_events
 	exception_0_exit
 
 	.align	6
@@ -304,6 +340,12 @@ _el_lower_fiq:
 	mov	x1, #0
 	mrs	x2, esr_el1
 	bl	fiq_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	mov	x3, #(0x3ff)  // 0x3ff means spurious interrupt,
+			      // it is used for the exception is not an interrupt
+	bl	handle_user_events
 	b	.
 
 	.align	6
@@ -313,5 +355,11 @@ _el_lower_error:
 	mov	x1, #0
 	mrs	x2, esr_el1
 	bl	error_handler
+	mov	x0, sp
+	mov	x1, #0
+	mrs	x2, esr_el1
+	mov	x3, #(0x3ff)  // 0x3ff means spurious interrupt,
+			      // it is used for the exception is not an interrupt
+	bl	handle_user_events
 	b	.
 

@@ -39,9 +39,7 @@ void kmain (void)
     iinit ();					// inode cache
     ideinit ();					// ide (memory block device)
 
-#ifdef INCLUDE_REMOVED
     timer_init (HZ);				// the timer (ticker)
-#endif
 
     sti ();
     userinit();					// first user process
