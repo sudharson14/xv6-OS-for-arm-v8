@@ -77,15 +77,40 @@ void gicc_set_bit(int base, int id, int bval) {
 	GICC_REG(base+ 4*offset) = rval;
 }
 
-static int spi2id(int spi)
+static void gd_enable(int intid)
 {
-	return spi+32;
+	gicd_set_bit(GICD_ISENABLE, intid, 1);
 }
 
-static void gd_spi_enable(int spi)
+static void gd_disable(int intid)
 {
-	int id = spi2id(spi);
-	gicd_set_bit(GICD_ISENABLE, id, 1);
+	gicd_set_bit(GICD_ICENABLE, intid, 1);
+}
+
+/* set cfg
+ */
+static void gd_setcfg(int intid, int is_edge)
+{
+	int offset = intid/16;
+	int bitpos = (intid%16)*2;
+	uint rval = GICD_REG(GICD_ICFG+4*offset);
+	uint vmask=0x03;
+	rval &= ~(vmask << bitpos);
+	if (is_edge)
+		rval |= 0x02 << bitpos;
+	GICD_REG(GICD_ICFG+ 4*offset) = rval;	
+}
+
+/* set target processor
+ */
+static void gd_target0(int intid)
+{
+	int offset = intid/4;
+	int bitpos = (intid%4)*8;
+	uint rval = GICD_REG(GICD_ITARGET+4*offset);
+	unsigned char tcpu=0x01;
+	rval |= tcpu << bitpos;
+	GICD_REG(GICD_ITARGET+ 4*offset) = rval;	
 }
 
 /* By default, SPI is group 0
@@ -97,44 +122,17 @@ static void gd_spi_group0(int spi)
 	return;
 }
 
-/* set target processor
- */
-static void gd_spi_target0(int spi)
-{
-	int id=spi2id(spi);
-	int offset = id/4;
-	int bitpos = (id%4)*8;
-	uint rval = GICD_REG(GICD_ITARGET+4*offset);
-	unsigned char tcpu=0x01;
-	rval |= tcpu << bitpos;
-	GICD_REG(GICD_ITARGET+ 4*offset) = rval;	
-}
-
-/* set cfg
- */
-static void gd_spi_setcfg(int spi, int is_edge)
-{
-	int id=spi2id(spi);
-	int offset = id/16;
-	int bitpos = (id%16)*2;
-	uint rval = GICD_REG(GICD_ICFG+4*offset);
-	uint vmask=0x03;
-	rval &= ~(vmask << bitpos);
-	if (is_edge)
-		rval |= 0x02 << bitpos;
-	GICD_REG(GICD_ICFG+ 4*offset) = rval;	
-}
-
 /*
  * TODO: process itype other than SPI
  */
 static void gic_dist_configure(int itype, int num)
 {
-	int spi= num;
-	gd_spi_setcfg(spi, 1);
-	gd_spi_enable(spi);
-	gd_spi_group0(spi);
-	gd_spi_target0(spi);
+    gd_setcfg(num, 1);
+    gd_enable(num);
+    gd_target0(num);
+
+    if ( itype == SPI_TYPE )
+	gd_spi_group0(num);
 }
 
 /*
@@ -177,14 +175,14 @@ void gic_disable()
 }
 /* configure and enable interrupt
  */
-static void gic_configure(int itype, int num)
+static void gic_configure(int itype, int intid)
 {
-	gic_dist_configure(itype, num);
+	gic_dist_configure(itype, intid);
 }
 
-void gic_eoi(int intn)
+void gic_eoi(int intid)
 {
-	GICC_REG(GICC_EOIR) = spi2id(intn);
+	GICC_REG(GICC_EOIR) = intid;
 }
 
 int gic_getack()
@@ -193,7 +191,7 @@ int gic_getack()
 }
 
 /* ISR code */
-#define NUM_INTSRC		32 // numbers of interrupt source supported
+#define NUM_INTSRC		64 // numbers of interrupt source supported
 
 static ISR isrs[NUM_INTSRC];
 
@@ -203,10 +201,10 @@ static void default_isr (struct trapframe *tf, int n)
 }
 
 
-void pic_enable (int n, ISR isr)
+void pic_enable (int intid, ISR isr)
 {
-	if(n < NUM_INTSRC) {
-		isrs[n] = isr;
+	if(intid < NUM_INTSRC) {
+		isrs[intid] = isr;
 	}
 }
 
@@ -240,11 +238,18 @@ void gic_init(void * base)
  */
 void pic_dispatch (struct trapframe *tp)
 {
-	int intid, intn;
+	int intid;
+
 	intid = gic_getack(); /* iack */
-	intn = intid - 32;
-	/* TODO: int disable here? **/
-	isrs[intn](tp, intn);
-	gic_eoi(intn);
+	if ( intid == 0x3ff )
+		goto out;  /*  spurious interrupt  */
+
+	gd_disable(intid);
+	gic_eoi(intid);
+	isrs[intid](tp, intid);
+	gd_enable(intid);
+
+out:
+	return;
 }
 
